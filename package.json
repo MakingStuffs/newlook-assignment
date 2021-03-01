@@ -1,0 +1,19 @@
+{
+  "name": "newlook.co.uk",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "node --experimental-vm-modules node_modules/.bin/jest --config jest.config.json --watch",
+    "dev": "browser-sync start --cors --server --files 'index.html' 'assets/css/*.css' 'assets/js/*js'"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "browser-sync": "^2.26.14",
+    "eslint": "^7.20.0",
+    "jest": "^26.6.3"
+  }
+}

@@ -1,0 +1,177 @@
+/* 
+    CSS containing styling for custom classes
+*/
+
+.wrapper {
+  background-color: white;
+  padding: 1.2rem 2.4rem;
+  border-radius: 5px;
+  width: 90%;
+  max-width: 900px;
+  box-shadow: 0 0 0.6rem rgba(black, 0.4);
+}
+
+/*
+    Header
+*/
+
+header {
+  text-align: center;
+}
+
+/*
+    Filter
+*/
+.filter__container form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-evenly;
+}
+
+.filter__search,
+.filter__range,
+.filter__type {
+  flex-basis: 300px;
+  margin: 1rem;
+}
+
+.filter__range,
+.filter__search input,
+.filter__type select {
+  appearance: none;
+  padding: 1rem;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: var(--b-radius);
+  width: 100%;
+  font-size: 1.6rem;
+}
+
+.filter__type:focus-within::before {
+  transform: translate(0.25rem) rotate(-135deg);
+}
+
+.filter__type:focus-within::after {
+  transform: translate(-0.25rem) rotate(135deg);
+}
+
+.filter__type::after,
+.filter__type::before {
+  position: absolute;
+  width: 1rem;
+  height: 0.3rem;
+  background-color: var(--dark);
+  content: '';
+  border-radius: var(--b-radius);
+  right: 1.5rem;
+  top: 50%;
+}
+
+.filter__type::before {
+  transform: translate(-0.25rem) rotate(45deg);
+}
+.filter__type::after {
+  transform: translate(0.25rem) rotate(-45deg);
+}
+
+.filter__type {
+  position: relative;
+}
+
+.filter__type select {
+  text-transform: capitalize;
+  cursor: pointer;
+}
+
+.filter-range__row {
+  display: flex;
+}
+.filter-range__row input[type='number'] {
+  display: inline-block;
+  align-self: flex-end;
+  width: 6rem;
+  padding: 0.5rem;
+}
+
+/*
+    Carousel
+*/
+
+.carousel__container {
+  overflow: hidden;
+  height: 90%;
+  min-height: 490px;
+}
+.carousel__content {
+  display: flex;
+  overflow-x: scroll;
+  padding: 2.4rem;
+}
+.product__card {
+  display: inline-block;
+  margin: 1rem;
+  box-shadow: 0 0 0.6rem rgba(0, 0, 0, 0.2);
+  padding: 1.2rem;
+  border-radius: var(--b-radius);
+  min-width: 300px;
+}
+
+.product__card:last-child {
+  margin-right: 5rem;
+}
+.product__thumb {
+  object-fit: cover;
+  border-radius: var(--b-radius);
+  width: 100%;
+}
+.product__card p {
+  font-size: 1.6rem;
+  line-height: 1.7;
+  font-weight: bold;
+}
+.product__card button {
+}
+
+/*
+    Card
+*/
+
+/*
+    Modal
+*/
+
+.product__modal {
+  opacity: 0;
+  z-index: -1;
+  height: 0;
+  visibility: hidden;
+  overflow: hidden;
+  transition: opacity 0.5s linear, visibility 0s linear 1s, height 0s linear 1s,
+    z-index 0s linear 1s;
+  position: fixed;
+}
+
+.product__modal[open] {
+  visibility: visible;
+  top: 0;
+  left: 0;
+  background-color: rgba(0, 0, 0, 0.8);
+  height: 100%;
+  width: 100%;
+  opacity: 1;
+  z-index: 10;
+}
+
+.product-modal__wrapper {
+  background-color: white;
+  padding: 1.2rem;
+  border-radius: var(--b-radius);
+  width: 90%;
+  max-width: 500px;
+  margin: auto;
+  max-height: 90%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="assets/css/base.css" rel="stylesheet" />
+    <title>New Look Interview Task | Paul Singh</title>
+  </head>
+  <body>
+    <main class="wrapper">
+      <header>
+        <h1>Chosen for you</h1>
+        <span>We think you will love these</span>
+      </header>
+      <div class="filter__container">
+        <form id="productFilterForm">
+          <div class="filter__search">
+            <input
+              name="search"
+              type="text"
+              minlength="3"
+              placeholder="Black jeans"
+            />
+          </div>
+          <div class="filter__range">
+            <div class="filter-range__row">
+              <label for="priceMin">Min:</label>
+              <input id="priceMin" type="range" />
+              <input id="priceMinNumb" type="number" />
+            </div>
+            <div class="filter-range__row">
+              <label for="priceMax">Max:</label>
+              <input id="priceMax" type="range" />
+              <input id="priceMaxNumb" type="number" />
+            </div>
+          </div>
+
+          <div class="filter__type"></div>
+          <input id="filters" hidden />
+        </form>
+      </div>
+      <div class="carousel__container">
+        <div class="carousel__content"></div>
+      </div>
+      <div id="productModal" class="product__modal">
+        <div class="product-modal__wrapper">
+          <picture class="product-modal__thumb">
+            <img src="" alt="" />
+          </picture>
+          <div class="product-modal__content">
+            <p class="product-modal__title"></p>
+            <p class="product-modal__price"></p>
+            <a class="product-modal__link">Buy Product</a>
+          </div>
+          <button id="productModalClose">Close</button>
+        </div>
+      </div>
+    </main>
+    <footer>
+      <script src="assets/js/index.js" type="module"></script>
+    </footer>
+    <link href="assets/css/main.css" rel="stylesheet" />
+  </body>
+</html>
