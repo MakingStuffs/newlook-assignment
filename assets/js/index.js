@@ -3,6 +3,7 @@ import data from './data/testData.js'
 // Document element getters for readability
 const getSearchInput = () => document.querySelector('input[name="search"]')
 const getTypeFilterContainer = () => document.querySelector('.filter__type')
+const getFilterContainer = () => document.querySelector('.filter__container')
 const getPriceMinInput = () => document.querySelector('#priceMin')
 const getPriceMaxInput = () => document.querySelector('#priceMax')
 const getPriceMaxInputNumb = () => document.querySelector('#priceMaxNumb')
@@ -12,6 +13,10 @@ const getProductModal = () => document.querySelector('.product__modal')
 const getModalClose = () => document.querySelector('#productModalClose')
 const getProductTypesInput = () => document.querySelector('#productTypes')
 const getFiltersElem = () => document.querySelector('#filters')
+const getFilterToggleButtons = () =>
+  document.querySelectorAll('.filter__button')
+const getCloseFilterFormButton = () =>
+  document.querySelector('#closeFilterForm')
 
 /**
  *
@@ -35,9 +40,10 @@ const createP = (content, classes) => {
  * Create a wrapping div element for our products
  */
 const createProductWrapper = () => {
-  const div = document.createElement('div')
-  div.classList = 'product__card'
-  return div
+  const button = document.createElement('button')
+  button.classList = 'product__card'
+  button.addEventListener('click', handleModalChange)
+  return button
 }
 
 /**
@@ -50,7 +56,7 @@ const createProductWrapper = () => {
 const createProductThumb = (src, alt) => {
   const img = document.createElement('img')
   img.classList = 'product__thumb'
-  img.setAttribute('height', '250px')
+  img.setAttribute('height', '200px')
   img.src = src
   img.alt = alt
 
@@ -83,7 +89,7 @@ function handleModalChange() {
   const modalPrice = modal.querySelector('.product-modal__price')
   const modalLink = modal.querySelector('.product-modal__link')
 
-  modalPrice.textContent = price
+  modalPrice.textContent = `£${price}`
   modalTitle.textContent = productTitle
 
   modalThumb.setAttribute('src', imageSrc)
@@ -96,18 +102,6 @@ function handleModalChange() {
 }
 
 /**
- * Function to create and return more info button to go on product card
- * will have event listener added already
- */
-const createProductInfoButton = () => {
-  const button = document.createElement('button')
-  button.textContent = 'More info'
-  button.classList = 'product__info'
-  button.addEventListener('click', handleModalChange)
-  return button
-}
-
-/**
  *
  * Output an array of product elements from the passed array of JSON objects
  *
@@ -115,15 +109,13 @@ const createProductInfoButton = () => {
  */
 const buildProducts = (products) =>
   products.map((product) => {
-    const { productTitle, price, imageSrc } = product
-    const productElem = createProductWrapper()
+    const { productTitle, imageSrc } = product
+    const productElem = createProductWrapper(product)
     const productThumb = createProductThumb(imageSrc, productTitle)
     const productDesc = createP(productTitle)
-    const priceElem = createP(`£${price}`)
-    const productInfoButton = createProductInfoButton()
 
-    productInfoButton.setAttribute('data-product', JSON.stringify(product))
-    productElem.append(productThumb, productDesc, priceElem, productInfoButton)
+    productElem.setAttribute('data-product', JSON.stringify(product))
+    productElem.append(productThumb, productDesc)
     return productElem
   })
 
@@ -231,6 +223,12 @@ const filterByPrice = (filter, products) =>
 const filterByType = (type, products) =>
   products.filter(({ productUrl }) => productUrl.includes(`clothing/${type}`))
 
+const getDefaultPrices = () => {
+  const min = getPriceMinInputNumb().getAttribute('value')
+  const max = getPriceMaxInputNumb().getAttribute('value')
+  return { min, max }
+}
+
 /**
  *
  * return an array of products which have been filtered according to the passed
@@ -240,13 +238,40 @@ const filterByType = (type, products) =>
  */
 const getFilteredProducts = (filters) => {
   const filterKeys = Object.keys(filters)
+  let min, max, defaultPrices
   const filteredProducts = filterKeys.reduce(
     (output, filter) => {
       switch (filter) {
         case 'search':
+          if (filters.search == '') {
+            const filterValueElem = getFiltersElem()
+            const filterValueJSON = getFiltersAsJSON()
+            delete filterValueJSON.search
+            filterValueElem.value = JSON.stringify(filterValueJSON)
+            getFilteredProducts(filterValueJSON)
+            filterDeactivate('search')
+            break
+          }
+
+          filterActivate('search')
           output = [...filterBySearch(filters.search, output)]
           break
         case 'price':
+          defaultPrices = getDefaultPrices()
+          min = filters.price.min
+          max = filters.price.max
+
+          if (min == defaultPrices.min && max == defaultPrices.max) {
+            const filterValueElem = getFiltersElem()
+            const filterValueJSON = getFiltersAsJSON()
+            delete filterValueJSON.price
+            filterValueElem.value = JSON.stringify(filterValueJSON)
+            getFilteredProducts(filterValueJSON)
+            filterDeactivate('price')
+            break
+          }
+
+          filterActivate('price')
           output = [...filterByPrice(filters.price, output)]
           break
         case 'type':
@@ -256,8 +281,10 @@ const getFilteredProducts = (filters) => {
             delete filterValueJSON.type
             filterValueElem.value = JSON.stringify(filterValueJSON)
             getFilteredProducts(filterValueJSON)
+            filterDeactivate('type')
             break
           }
+          filterActivate('type')
           output = [...filterByType(filters.type, output)]
           break
         default:
@@ -299,6 +326,7 @@ function handleFilterChange() {
   const filtersJSON = getFiltersAsJSON()
   const filteredProducts = getFilteredProducts(filtersJSON)
   const filteredProductElements = buildProducts(filteredProducts)
+
   return filteredProducts.length > 0
     ? appendProducts(filteredProductElements)
     : noProductsFound()
@@ -312,13 +340,13 @@ function handlePriceChange() {
   const maxInput = getPriceMaxInput()
   const minInputNumb = getPriceMinInputNumb()
   const maxInputNumb = getPriceMaxInputNumb()
+
   const value = parseInt(this.value)
   let min = parseInt(minInput.value)
   let max = parseInt(maxInput.value)
 
   // Alter max price
   if (this.id.includes('priceMax')) {
-    console.log('yo')
     // Is it valid
     const isValid = value > min
     // if new max is not greater than current min max it one more than it
@@ -465,6 +493,99 @@ const buildProductTypesFilter = (productTypes) => {
 }
 
 /**
+ *
+ */
+function filterFormToggle() {
+  const associatedInput = document.querySelector(
+    `#${this.getAttribute('aria-controls')}`
+  )
+  const activeButton = document.querySelector('[active-button]')
+  const openFilter = document.querySelector('[open-filter]')
+  const filterContainer = getFilterContainer()
+
+  if (this.hasAttribute('active-button')) {
+    closeForm()
+    this.blur()
+  }
+
+  if (activeButton) {
+    activeButton.removeAttribute('active-button')
+  }
+
+  if (openFilter) {
+    openFilter.removeAttribute('open-filter')
+  }
+
+  if (!this.hasAttribute('active-button')) {
+    this.setAttribute('active-button', '')
+    associatedInput.setAttribute('open-filter', '')
+    filterContainer.setAttribute('open', '')
+  }
+}
+
+/**
+ * Remove the active filter attribute from the filter type provided
+ *
+ * @param {string} toDeactivate filter to deactivate
+ */
+const filterDeactivate = (toDeactivate) => {
+  let elem
+  switch (toDeactivate) {
+    case 'type':
+      elem = document.querySelector('#typeToggle')
+      elem.removeAttribute('active-filter')
+      break
+    case 'price':
+      elem = document.querySelector('#priceToggle')
+      elem.removeAttribute('active-filter')
+      break
+    case 'search':
+      elem = document.querySelector('#searchToggle')
+      elem.removeAttribute('active-filter')
+      break
+    default:
+      break
+  }
+}
+
+/**
+ * Add the active-filter attribute to the filter provided
+ * @param {string} toDeactivate
+ */
+const filterActivate = (toActivate) => {
+  let elem
+  switch (toActivate) {
+    case 'type':
+      elem = document.querySelector('#typeToggle')
+      elem.setAttribute('active-filter', '')
+      break
+    case 'price':
+      elem = document.querySelector('#priceToggle')
+      elem.setAttribute('active-filter', '')
+      break
+    case 'search':
+      elem = document.querySelector('#searchToggle')
+      elem.setAttribute('active-filter', '')
+      break
+    default:
+      break
+  }
+}
+
+/**
+ * Close the filter form
+ * @param {object} event js event object
+ */
+const closeForm = (event) => {
+  event.preventDefault()
+  const filterContainer = getFilterContainer()
+  const activeButton = document.querySelector('[active-button]')
+  const openFilter = document.querySelector('[open-filter]')
+  openFilter.removeAttribute('open-filter')
+  activeButton.removeAttribute('active-button')
+  filterContainer.removeAttribute('open')
+}
+/**
  * Initialize the carousel on the load of the DOM
  */
 document.addEventListener('DOMContentLoaded', () => {
@@ -477,6 +598,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const priceMinInputNumb = getPriceMinInputNumb()
   const priceMaxInputNumb = getPriceMaxInputNumb()
   const productTypes = getProductTypes(data)
+  const filterToggleButtons = getFilterToggleButtons()
+  const closeFilterFormButton = getCloseFilterFormButton()
 
   appendProducts(products)
   setMinMaxPriceRange(minMaxPrices)
@@ -494,4 +617,8 @@ document.addEventListener('DOMContentLoaded', () => {
   priceMaxInputNumb.addEventListener('change', handlePriceChange)
 
   modalClose.addEventListener('click', modalToggle)
+  filterToggleButtons.forEach((btn) =>
+    btn.addEventListener('click', filterFormToggle)
+  )
+  closeFilterFormButton.addEventListener('click', closeForm)
 })

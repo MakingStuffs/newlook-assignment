@@ -14,8 +14,30 @@
         <span>We think you will love these</span>
       </header>
       <div class="filter__container">
+        <button
+          class="filter__button"
+          aria-controls="searchFilter"
+          id="searchToggle"
+        >
+          Search
+        </button>
+        <button
+          class="filter__button"
+          aria-controls="priceFilter"
+          id="priceToggle"
+        >
+          Price
+        </button>
+        <button
+          class="filter__button"
+          aria-controls="typeFilter"
+          id="typeToggle"
+        >
+          Type
+        </button>
+
         <form id="productFilterForm">
-          <div class="filter__search">
+          <div class="filter__search" id="searchFilter">
             <input
               name="search"
               type="text"
@@ -23,20 +45,20 @@
               placeholder="Black jeans"
             />
           </div>
-          <div class="filter__range">
+          <div class="filter__range" id="priceFilter">
             <div class="filter-range__row">
               <label for="priceMin">Min:</label>
               <input id="priceMin" type="range" />
-              <input id="priceMinNumb" type="number" />
+              <input id="priceMinNumb" type="number" inputmode="numeric" />
             </div>
             <div class="filter-range__row">
               <label for="priceMax">Max:</label>
               <input id="priceMax" type="range" />
-              <input id="priceMaxNumb" type="number" />
+              <input id="priceMaxNumb" type="number" inputmode="numeric" />
             </div>
           </div>
-
-          <div class="filter__type"></div>
+          <div class="filter__type" id="typeFilter"></div>
+          <button id="closeFilterForm">Close</button>
           <input id="filters" hidden />
         </form>
       </div>
@@ -51,9 +73,9 @@
           <div class="product-modal__content">
             <p class="product-modal__title"></p>
             <p class="product-modal__price"></p>
-            <a class="product-modal__link">Buy Product</a>
           </div>
-          <button id="productModalClose">Close</button>
+          <a class="product-modal__link">Buy Product</a>
+          <button id="productModalClose"></button>
         </div>
       </div>
     </main>
