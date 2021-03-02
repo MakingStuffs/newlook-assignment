@@ -40,9 +40,6 @@ header span {
   padding: 1rem 0;
 }
 
-.filter__container[open] {
-}
-
 #priceToggle,
 #searchToggle,
 #typeToggle {
