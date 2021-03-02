@@ -1,67 +1,5 @@
 import data from './data/testData.js'
-
-// Document element getters for readability
-const getSearchInput = () => document.querySelector('input[name="search"]')
-const getTypeFilterContainer = () => document.querySelector('.filter__type')
-const getFilterContainer = () => document.querySelector('.filter__container')
-const getPriceMinInput = () => document.querySelector('#priceMin')
-const getPriceMaxInput = () => document.querySelector('#priceMax')
-const getPriceMaxInputNumb = () => document.querySelector('#priceMaxNumb')
-const getPriceMinInputNumb = () => document.querySelector('#priceMinNumb')
-const getProductsWrapper = () => document.querySelector('.carousel__content')
-const getProductModal = () => document.querySelector('.product__modal')
-const getModalClose = () => document.querySelector('#productModalClose')
-const getProductTypesInput = () => document.querySelector('#productTypes')
-const getFiltersElem = () => document.querySelector('#filters')
-const getFilterToggleButtons = () =>
-  document.querySelectorAll('.filter__button')
-const getCloseFilterFormButton = () =>
-  document.querySelector('#closeFilterForm')
-
-/**
- *
- * Return a HTML P element with the passes parameters set
- *
- * @param {string} content TextContent for the P element
- * @param {string} classes CSS classes to add to the p element
- */
-const createP = (content, classes) => {
-  const p = document.createElement('p')
-  if (classes) {
-    p.classList = classes
-  }
-  if (content) {
-    p.textContent = content
-  }
-  return p
-}
-
-/**
- * Create a wrapping div element for our products
- */
-const createProductWrapper = () => {
-  const button = document.createElement('button')
-  button.classList = 'product__card'
-  button.addEventListener('click', handleModalChange)
-  return button
-}
-
-/**
- *
- * Return an img element with the correct attrs for the product thumbnail
- *
- * @param {string} src the src attribute used in the thumbnail
- * @param {string} alt the alt attribute used in the thumbnail
- */
-const createProductThumb = (src, alt) => {
-  const img = document.createElement('img')
-  img.classList = 'product__thumb'
-  img.setAttribute('height', '200px')
-  img.src = src
-  img.alt = alt
-
-  return img
-}
+import * as helpers from './modules/helpers.js'
 
 /**
  * Either adds or removes the open attribute from the modal
@@ -69,7 +7,7 @@ const createProductThumb = (src, alt) => {
  * @param {boolean} openOrClose whether to open or close the modal
  */
 const modalToggle = (openOrClose) => {
-  const modal = getProductModal()
+  const modal = helpers.getProductModal()
   return openOrClose === 'open'
     ? modal.setAttribute('open', '')
     : modal.removeAttribute('open')
@@ -83,7 +21,7 @@ function handleModalChange() {
   const { productTitle, imageSrc, price, productUrl } = JSON.parse(
     this.getAttribute('data-product')
   )
-  const modal = getProductModal()
+  const modal = helpers.getProductModal()
   const modalThumb = modal.querySelector('.product-modal__thumb img')
   const modalTitle = modal.querySelector('.product-modal__title')
   const modalPrice = modal.querySelector('.product-modal__price')
@@ -110,9 +48,9 @@ function handleModalChange() {
 const buildProducts = (products) =>
   products.map((product) => {
     const { productTitle, imageSrc } = product
-    const productElem = createProductWrapper(product)
-    const productThumb = createProductThumb(imageSrc, productTitle)
-    const productDesc = createP(productTitle)
+    const productElem = helpers.createProductWrapper(handleModalChange)
+    const productThumb = helpers.createProductThumb(imageSrc, productTitle)
+    const productDesc = helpers.createP(productTitle)
 
     productElem.setAttribute('data-product', JSON.stringify(product))
     productElem.append(productThumb, productDesc)
@@ -126,7 +64,7 @@ const buildProducts = (products) =>
  * @param {array} products array of HTML elements
  */
 const appendProducts = (products) => {
-  const wrapper = getProductsWrapper()
+  const wrapper = helpers.getProductsWrapper()
   removeChildNodes(wrapper)
   products.forEach((product) => wrapper.appendChild(product))
 }
@@ -144,13 +82,13 @@ const removeChildNodes = (elem) => {
 
 /**
  *
- * Set the value of the hidden filter input used to filtering products
+ * Set the value of the hidden filter input used for filtering products
  *
  * @param {object} newFilter object of the new filter
  */
 const setCurrentFilters = (newFilter) => {
   // Get the hidden input elem with the filter values
-  const filterValueElem = getFiltersElem()
+  const filterValueElem = helpers.getFiltersElem()
   // IF there are no current filters we just need to assign the new Filter
   if (!filterValueElem.value) {
     filterValueElem.value = JSON.stringify(newFilter)
@@ -167,143 +105,11 @@ const setCurrentFilters = (newFilter) => {
 }
 
 /**
- * Parses the output of getFiltersElem().value as a true JSON object
- */
-const getFiltersAsJSON = () => JSON.parse(getFiltersElem().value)
-
-/**
- *
- * filter products list into an array of elements whose
- * titles contain the words passed in the filter
- *
- * @param {string} filter word to be matched
- * @param {array} products array to be filtered
- */
-const filterBySearch = (filter, products) => {
-  // Split words into an array
-  const words = filter.split(/ /).map((word) => word.toLowerCase())
-  // reduce products array into one with just products containing our words
-  const filtered = products.reduce((output, product) => {
-    // default to true
-    let includesAllTerms = true
-    // iterate our words
-    words.forEach((word) => {
-      //Test the current product title against the current search word
-      if (!product.productTitle.toLowerCase().includes(word.toLowerCase())) {
-        // If it doesn't include the search word set the variable to false
-        includesAllTerms = false
-      }
-    })
-    // If all terms are present in the title push the object to output
-    if (includesAllTerms) {
-      output.push(product)
-    }
-    // Return the output array
-    return output
-  }, [])
-  // Return our filtered array
-  return filtered
-}
-
-/**
- * filter products according to min and max price
- *
- * @param {object} filter object with min and max price
- * @param {array} products array of product objects
- */
-const filterByPrice = (filter, products) =>
-  products.filter(({ price }) => price >= filter.min && price <= filter.max)
-
-/**
- * Filter products according to type
- *
- * @param {string} type string containing the current type
- * @param {array} products array of product objects
- */
-const filterByType = (type, products) =>
-  products.filter(({ productUrl }) => productUrl.includes(`clothing/${type}`))
-
-const getDefaultPrices = () => {
-  const min = getPriceMinInputNumb().getAttribute('value')
-  const max = getPriceMaxInputNumb().getAttribute('value')
-  return { min, max }
-}
-
-/**
- *
- * return an array of products which have been filtered according to the passed
- * object
- *
- * @param {object} filters an object containing key/value pairs of filter
- */
-const getFilteredProducts = (filters) => {
-  const filterKeys = Object.keys(filters)
-  let min, max, defaultPrices
-  const filteredProducts = filterKeys.reduce(
-    (output, filter) => {
-      switch (filter) {
-        case 'search':
-          if (filters.search == '') {
-            const filterValueElem = getFiltersElem()
-            const filterValueJSON = getFiltersAsJSON()
-            delete filterValueJSON.search
-            filterValueElem.value = JSON.stringify(filterValueJSON)
-            getFilteredProducts(filterValueJSON)
-            filterDeactivate('search')
-            break
-          }
-
-          filterActivate('search')
-          output = [...filterBySearch(filters.search, output)]
-          break
-        case 'price':
-          defaultPrices = getDefaultPrices()
-          min = filters.price.min
-          max = filters.price.max
-
-          if (min == defaultPrices.min && max == defaultPrices.max) {
-            const filterValueElem = getFiltersElem()
-            const filterValueJSON = getFiltersAsJSON()
-            delete filterValueJSON.price
-            filterValueElem.value = JSON.stringify(filterValueJSON)
-            getFilteredProducts(filterValueJSON)
-            filterDeactivate('price')
-            break
-          }
-
-          filterActivate('price')
-          output = [...filterByPrice(filters.price, output)]
-          break
-        case 'type':
-          if (filters.type == 0) {
-            const filterValueElem = getFiltersElem()
-            const filterValueJSON = getFiltersAsJSON()
-            delete filterValueJSON.type
-            filterValueElem.value = JSON.stringify(filterValueJSON)
-            getFilteredProducts(filterValueJSON)
-            filterDeactivate('type')
-            break
-          }
-          filterActivate('type')
-          output = [...filterByType(filters.type, output)]
-          break
-        default:
-          break
-      }
-      return output
-    },
-    [...data]
-  )
-
-  return filteredProducts
-}
-
-/**
  * Append a p element with an error message
  * to the product wrapper if no products match the filter
  */
 const noProductsFound = () => {
-  const p = createP(
+  const p = helpers.createP(
     'It looks as though we cant find anything to match your filters. Please try again.',
     'nothing-found'
   )
@@ -323,8 +129,8 @@ const noProductsFound = () => {
 function handleFilterChange() {
   const filter = { [this.name]: this.value }
   setCurrentFilters(filter)
-  const filtersJSON = getFiltersAsJSON()
-  const filteredProducts = getFilteredProducts(filtersJSON)
+  const filtersJSON = helpers.getFiltersAsJSON()
+  const filteredProducts = helpers.getFilteredProducts(filtersJSON)
   const filteredProductElements = buildProducts(filteredProducts)
 
   return filteredProducts.length > 0
@@ -336,10 +142,10 @@ function handleFilterChange() {
  * Handles the event when a user changes the price filter
  */
 function handlePriceChange() {
-  const minInput = getPriceMinInput()
-  const maxInput = getPriceMaxInput()
-  const minInputNumb = getPriceMinInputNumb()
-  const maxInputNumb = getPriceMaxInputNumb()
+  const minInput = helpers.getPriceMinInput()
+  const maxInput = helpers.getPriceMaxInput()
+  const minInputNumb = helpers.getPriceMinInputNumb()
+  const maxInputNumb = helpers.getPriceMaxInputNumb()
 
   const value = parseInt(this.value)
   let min = parseInt(minInput.value)
@@ -383,27 +189,15 @@ function handlePriceChange() {
 }
 
 /**
- * return an object containing the min and max price range from the passed objects
- * @param {array} products array of products
- */
-const getMinMaxPricesFromProducts = (products) => {
-  const prices = products.map((product) => parseFloat(product.price))
-  return {
-    max: Math.ceil(Math.max(...prices)),
-    min: Math.floor(Math.min(...prices)),
-  }
-}
-
-/**
  *
  * Set the values of the min and max price elements according the passed object
  * @param {object} minMaxPrices object containing min and max prices
  */
 const setMinMaxPriceRange = (minMaxPrices) => {
-  const priceMinInput = getPriceMinInput()
-  const priceMaxInput = getPriceMaxInput()
-  const priceMinInputNumb = getPriceMinInputNumb()
-  const priceMaxInputNumb = getPriceMaxInputNumb()
+  const priceMinInput = helpers.getPriceMinInput()
+  const priceMaxInput = helpers.getPriceMaxInput()
+  const priceMinInputNumb = helpers.getPriceMinInputNumb()
+  const priceMaxInputNumb = helpers.getPriceMaxInputNumb()
 
   priceMaxInput.setAttribute('min', minMaxPrices.min)
   priceMinInput.setAttribute('min', minMaxPrices.min)
@@ -422,30 +216,6 @@ const setMinMaxPriceRange = (minMaxPrices) => {
 
   priceMaxInputNumb.setAttribute('value', minMaxPrices.max)
   priceMinInputNumb.setAttribute('value', minMaxPrices.min)
-}
-
-/**
- * return an array of strings containing product types
- * @param {array} products array of products
- */
-const getProductTypes = (products) => {
-  const typeRegex = /(clothing\/)([a-z]+(-[a-z]+)*)/g
-  const productTypes = products.reduce((output, current) => {
-    const currentUrl = current.productUrl
-    // Get the current type if there is one
-    const currentType = typeRegex.test(currentUrl)
-      ? currentUrl.match(typeRegex)[0].split('/')[1]
-      : null
-    // Reset the regex to stop it acting weird when iterated multiple times
-    typeRegex.lastIndex = 0
-    // Push the current type to the array if the type exists and isnt already present
-    if (currentType && !output.includes(currentType)) {
-      output.push(currentType)
-    }
-
-    return output
-  }, [])
-  return productTypes
 }
 
 /**
@@ -481,7 +251,7 @@ const createOptionElements = (productTypes) => {
  * @param {array} productTypes array of strings
  */
 const buildProductTypesFilter = (productTypes) => {
-  const wrapper = getTypeFilterContainer()
+  const wrapper = helpers.getTypeFilterContainer()
   const select = document.createElement('select')
   const options = createOptionElements(productTypes)
 
@@ -501,21 +271,26 @@ function filterFormToggle() {
   )
   const activeButton = document.querySelector('[active-button]')
   const openFilter = document.querySelector('[open-filter]')
-  const filterContainer = getFilterContainer()
+  const filterContainer = helpers.getFilterContainer()
 
+  // This button is active so close the form
   if (this.hasAttribute('active-button')) {
     closeForm()
     this.blur()
+    return
   }
 
+  // A different button is active, close it
   if (activeButton) {
     activeButton.removeAttribute('active-button')
   }
 
+  // Also remove the open-filter attr from it
   if (openFilter) {
     openFilter.removeAttribute('open-filter')
   }
 
+  // Activate this filter button
   if (!this.hasAttribute('active-button')) {
     this.setAttribute('active-button', '')
     associatedInput.setAttribute('open-filter', '')
@@ -524,101 +299,78 @@ function filterFormToggle() {
 }
 
 /**
- * Remove the active filter attribute from the filter type provided
- *
- * @param {string} toDeactivate filter to deactivate
- */
-const filterDeactivate = (toDeactivate) => {
-  let elem
-  switch (toDeactivate) {
-    case 'type':
-      elem = document.querySelector('#typeToggle')
-      elem.removeAttribute('active-filter')
-      break
-    case 'price':
-      elem = document.querySelector('#priceToggle')
-      elem.removeAttribute('active-filter')
-      break
-    case 'search':
-      elem = document.querySelector('#searchToggle')
-      elem.removeAttribute('active-filter')
-      break
-    default:
-      break
-  }
-}
-
-/**
- * Add the active-filter attribute to the filter provided
- * @param {string} toDeactivate
- */
-const filterActivate = (toActivate) => {
-  let elem
-  switch (toActivate) {
-    case 'type':
-      elem = document.querySelector('#typeToggle')
-      elem.setAttribute('active-filter', '')
-      break
-    case 'price':
-      elem = document.querySelector('#priceToggle')
-      elem.setAttribute('active-filter', '')
-      break
-    case 'search':
-      elem = document.querySelector('#searchToggle')
-      elem.setAttribute('active-filter', '')
-      break
-    default:
-      break
-  }
-}
-
-/**
  * Close the filter form
  * @param {object} event js event object
  */
-const closeForm = (event) => {
-  event.preventDefault()
-  const filterContainer = getFilterContainer()
+const closeForm = (event = null) => {
+  // Ensure event exists before using it
+  if (event) {
+    event.preventDefault()
+  }
+
+  const filterContainer = helpers.getFilterContainer()
   const activeButton = document.querySelector('[active-button]')
   const openFilter = document.querySelector('[open-filter]')
   openFilter.removeAttribute('open-filter')
   activeButton.removeAttribute('active-button')
   filterContainer.removeAttribute('open')
 }
+
 /**
  * Initialize the carousel on the load of the DOM
  */
 document.addEventListener('DOMContentLoaded', () => {
+  // Set our variables and call elements we need
   const products = buildProducts(data)
-  const modalClose = getModalClose()
-  const search = getSearchInput()
-  const minMaxPrices = getMinMaxPricesFromProducts(data)
-  const priceMinInput = getPriceMinInput()
-  const priceMaxInput = getPriceMaxInput()
-  const priceMinInputNumb = getPriceMinInputNumb()
-  const priceMaxInputNumb = getPriceMaxInputNumb()
-  const productTypes = getProductTypes(data)
-  const filterToggleButtons = getFilterToggleButtons()
-  const closeFilterFormButton = getCloseFilterFormButton()
+  const modalClose = helpers.getModalClose()
+  const search = helpers.getSearchInput()
+  const minMaxPrices = helpers.getMinMaxPricesFromProducts(data)
+  const priceMinInput = helpers.getPriceMinInput()
+  const priceMaxInput = helpers.getPriceMaxInput()
+  const priceMinInputNumb = helpers.getPriceMinInputNumb()
+  const priceMaxInputNumb = helpers.getPriceMaxInputNumb()
+  const productTypes = helpers.getProductTypes(data)
+  const filterToggleButtons = helpers.getFilterToggleButtons()
+  const closeFilterFormButton = helpers.getCloseFilterFormButton()
 
+  // Append the newly created products array to the carousel wrapper
   appendProducts(products)
+
+  // Set the initial min and max prices according to the min n max
+  // in the products array
   setMinMaxPriceRange(minMaxPrices)
+
+  // Build our select drop down for product types
   buildProductTypesFilter(productTypes)
 
-  getProductTypesInput().addEventListener('change', handleFilterChange)
+  // Add listener to product type selector
+  helpers.getProductTypesInput().addEventListener('change', handleFilterChange)
 
+  // Add listeners to search filter
   search.addEventListener('change', handleFilterChange)
   search.addEventListener('input', handleFilterChange)
   search.addEventListener('keypress', handleFilterChange)
 
+  // Add listeners to price filter
   priceMinInput.addEventListener('change', handlePriceChange)
   priceMaxInput.addEventListener('change', handlePriceChange)
   priceMinInputNumb.addEventListener('change', handlePriceChange)
   priceMaxInputNumb.addEventListener('change', handlePriceChange)
 
+  // Add listener to modal
   modalClose.addEventListener('click', modalToggle)
+
+  // Add listeners to filter open buttons
   filterToggleButtons.forEach((btn) =>
     btn.addEventListener('click', filterFormToggle)
   )
+
+  // Add listener to close form button
   closeFilterFormButton.addEventListener('click', closeForm)
+
+  // Set the --vh css var according to the current window height
+  document.documentElement.style.setProperty(
+    '--vh',
+    `${window.innerHeight * 0.01}px`
+  )
 })

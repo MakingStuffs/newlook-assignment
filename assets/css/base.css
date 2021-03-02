@@ -5,9 +5,7 @@
 :root {
   --vh: 1vh;
   --primary: royalBlue;
-  --primary-dark: rgb(50, 81, 176);
   --secondary: teal;
-  --accent: orange;
   --black: #111;
   --dark: #333;
   --grey: #eaeceb;
@@ -37,11 +35,30 @@ body {
   flex-direction: column;
   align-items: center;
   background-color: white;
+  min-height: calc(100 * var(--vh));
 }
 
 h1 {
   font-size: 2.6rem;
-  margin: 0;
+  margin: 0 0 1rem 0;
+}
+
+h1 span {
+  font-size: 2.6rem !important;
+  position: relative;
+  text-transform: uppercase;
+}
+
+h1 span::after {
+  width: 75%;
+  position: absolute;
+  top: calc(100% + 2px);
+  left: 50%;
+  height: 4px;
+  border-radius: 10px;
+  content: '';
+  transform: translateX(-50%);
+  background-color: var(--secondary);
 }
 
 a {
@@ -50,7 +67,7 @@ a {
 }
 
 a:hover {
-  background-color: var(--accent);
+  background-color: var(--secondary);
 }
 
 a:visited {
