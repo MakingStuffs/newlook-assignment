@@ -58,8 +58,8 @@ header span {
 .filter__container #priceToggle[active-filter]::after {
   position: absolute;
   content: '';
-  top: 0;
-  right: 0;
+  top: 1rem;
+  right: 1rem;
   width: 1rem;
   height: 1rem;
   background-color: red;
