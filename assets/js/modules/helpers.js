@@ -290,3 +290,8 @@ export const getProductTypes = (products) => {
   }, [])
   return productTypes
 }
+
+/**
+ * Return a string with the hyphens swapped for spaces
+ */
+export const formatForLabel = (word) => word.split(/-/g).join(' ')

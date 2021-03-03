@@ -219,11 +219,6 @@ const setMinMaxPriceRange = (minMaxPrices) => {
 }
 
 /**
- * Return a string with the hyphens swapped for spaces
- */
-const formatForLabel = (word) => word.split(/-/g).join(' ')
-
-/**
  * return an array of HTML option elements from the passed
  * array of product types
  * @param {array} productTypes an array of strings
@@ -235,7 +230,7 @@ const createOptionElements = (productTypes) => {
 
   const types = productTypes.map((pType) => {
     const option = document.createElement('option')
-    const formattedLabel = formatForLabel(pType)
+    const formattedLabel = helpers.formatForLabel(pType)
     option.value = pType
     option.textContent = formattedLabel
     return option
@@ -263,18 +258,24 @@ const buildProductTypesFilter = (productTypes) => {
 }
 
 /**
- *
+ * Handle the open and closed state of the filter form
+ * Also used to switch between open filters
  */
 function filterFormToggle() {
+  // Input associated with the current filter button
   const associatedInput = document.querySelector(
     `#${this.getAttribute('aria-controls')}`
   )
+  // Any other button which is currently active
   const activeButton = document.querySelector('[active-button]')
+  // The actively open filter -- should be the same as active button
   const openFilter = document.querySelector('[open-filter]')
+  // The filter wrapper
   const filterContainer = helpers.getFilterContainer()
 
   // This button is active so close the form
   if (this.hasAttribute('active-button')) {
+    // If this is the active button close the form
     closeForm()
     this.blur()
     return
